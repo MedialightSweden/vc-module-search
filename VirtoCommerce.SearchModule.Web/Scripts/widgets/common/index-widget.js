@@ -1,13 +1,15 @@
 ﻿angular.module('virtoCommerce.searchModule')
-.controller('virtoCommerce.searchModule.indexWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.searchModule.search', function ($scope, bladeNavigationService, searchAPI) {
+.controller('virtoCommerce.searchModule.indexWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.searchModule.search', function ($scope, bladeNavigationService, searchApi) {
     var blade = $scope.blade;
     $scope.loading = true;
 
     function refresh() {
-        searchAPI.query({ documentType: $scope.widget.documentType, documentId: blade.currentEntityId }, function (data) {
+        searchApi.query({ documentType: $scope.widget.documentType, documentId: blade.currentEntityId }, function (data) {
             if (_.any(data)) {
                 $scope.index = data[0];
-                $scope.indexDate = moment.utc($scope.index.lastindexdate, 'YYYYMMDDHHmmss');
+                // 621355968000000000 ticks of Microsoft's DateTime is start of Unix epoch - Jan 1 1970 12:00 AM UTC
+                // 10000 Microsoft's DateTime ticks is 1 millisecond
+                $scope.indexDate = new Date(($scope.index.lastindexdate - 621355968000000000) / 10000);
             }
 
             $scope.loading = false;
@@ -17,7 +19,7 @@
 
     function updateStatus() {
         if (!$scope.loading && blade.currentEntity) {
-            $scope.widget.UIclass = !$scope.index || ($scope.indexDate < moment.utc(blade.currentEntity.modifiedDate)) ? 'error' : '';
+            $scope.widget.UIclass = !$scope.index || ($scope.indexDate < new Date(blade.currentEntity.modifiedDate)) ? 'error' : '';
         }
     }
 

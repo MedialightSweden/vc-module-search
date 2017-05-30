@@ -4,7 +4,9 @@
             <div ng-if="blade.currentEntity">
                 <div class="sub-t">{{ 'search.blades.index-detail.labels.build-date' | translate }}</div>
                 <div class="form-input __calendar">
-                    <input ng-value="blade.indexDate.local().format().substring(0, 19)" disabled="disabled">
+                    <input ng-model="blade.indexDate"
+                           datepicker-popup="medium"
+                           disabled="disabled">
                     <button type="button" class="btn" disabled="disabled">
                         <i class="btn-ico fa fa-calendar"></i>
                     </button>
