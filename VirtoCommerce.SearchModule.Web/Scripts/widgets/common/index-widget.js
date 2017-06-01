@@ -9,7 +9,7 @@
                 $scope.index = data[0];
                 // 621355968000000000 ticks of Microsoft's DateTime is start of Unix epoch - Jan 1 1970 12:00 AM UTC
                 // 10000 Microsoft's DateTime ticks is 1 millisecond
-                $scope.indexDate = new Date(($scope.index.lastindexdate - 621355968000000000) / 10000);
+                $scope.indexDate = angular.isNumber($scope.index.lastindexdate) ? new Date(($scope.index.lastindexdate - 621355968000000000) / 10000) : new Date($scope.index.lastindexdate);
             }
 
             $scope.loading = false;
