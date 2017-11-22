@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
@@ -107,7 +108,7 @@ namespace VirtoCommerce.SearchModule.Data.Providers.LuceneSearch
                 {
                     DefaultOperator = QueryParser.Operator.AND
                 };
-                var parsedQuery = parser.Parse(criteria.RawQuery);
+                var parsedQuery = GetSafeQuery(parser,criteria.RawQuery);
                 query.Add(parsedQuery, Occur.MUST);
             }
         }
@@ -144,9 +145,33 @@ namespace VirtoCommerce.SearchModule.Data.Providers.LuceneSearch
                     DefaultOperator = QueryParser.Operator.AND
                 };
 
-                var searchQuery = parser.Parse(searchPhrase);
+                var searchQuery = GetSafeQuery(parser,searchPhrase);
                 query.Add(searchQuery, Occur.MUST);
             }
+        }
+
+        private Query GetSafeQuery(QueryParser queryParser, string query)
+        {
+            Query safeQuery;
+
+            try
+            {
+                safeQuery = queryParser.Parse(query);
+            }
+
+            catch (ParseException)
+            {
+                safeQuery = null;
+            }
+
+            if (safeQuery == null)
+            {
+                var cooked = Regex.Replace(query, @"[^\w\.@-]", " ");
+
+                safeQuery = queryParser.Parse(cooked);
+            }
+
+            return safeQuery;
         }
 
         /// <summary>
