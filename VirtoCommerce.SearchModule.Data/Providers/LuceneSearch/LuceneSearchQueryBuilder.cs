@@ -108,7 +108,7 @@ namespace VirtoCommerce.SearchModule.Data.Providers.LuceneSearch
                 {
                     DefaultOperator = QueryParser.Operator.AND
                 };
-                var parsedQuery = GetSafeQuery(parser,criteria.RawQuery);
+                var parsedQuery = GetSafeQuery(parser, criteria.RawQuery);
                 query.Add(parsedQuery, Occur.MUST);
             }
         }
@@ -120,14 +120,9 @@ namespace VirtoCommerce.SearchModule.Data.Providers.LuceneSearch
                 var searchPhrase = criteria.SearchPhrase;
                 if (criteria.IsFuzzySearch)
                 {
-                    const float fuzzyMinSimilarity = 0.7f;
-                    var keywords = criteria.SearchPhrase.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                    var keywords = criteria.SearchPhrase.Replace("~", string.Empty).Replace("\"", string.Empty).Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries).Distinct();
 
-                    searchPhrase = string.Empty;
-                    searchPhrase = keywords.Aggregate(
-                        searchPhrase,
-                        (current, keyword) =>
-                            current + $"{keyword.Replace("~", "")}~{fuzzyMinSimilarity.ToString(CultureInfo.InvariantCulture)}");
+                    searchPhrase = $"\"{string.Join(" ",keywords)}\"~30";
                 }
 
                 var fields = new List<string> { "__content" };
@@ -145,7 +140,7 @@ namespace VirtoCommerce.SearchModule.Data.Providers.LuceneSearch
                     DefaultOperator = QueryParser.Operator.AND
                 };
 
-                var searchQuery = GetSafeQuery(parser,searchPhrase);
+                var searchQuery = GetSafeQuery(parser, searchPhrase);
                 query.Add(searchQuery, Occur.MUST);
             }
         }
